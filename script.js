@@ -1,89 +1,102 @@
-let image = [];
-for (let i = 0; i < 5; i++) {
-  let t = document.createElement("img");
-  t.setAttribute("data-ns-test", `img${i + 1}`);
-  t.width = 100;
-  t.height = 100;
-  t.onclick = (e) => captchaClick(e);
-  t.src = `images/${i + 1}.jpg`;
-  image.push(t);
-}
-let temp = Math.floor(Math.random() * 5);
-let t = document.createElement("img");
-t.setAttribute("data-ns-test", `img${temp + 1}`);
-t.width = 100;
-t.height = 100;
-t.onclick = (e) => captchaClick(e);
-t.src = `images/${temp + 1}.jpg`;
-image.push(t);
-image.sort(() => Math.random() - 0.5);
-for (let i = 0; i < 6; i++) {
-  document.getElementById("main").appendChild(image[i]);
+// Your JS code here.
+let heading3 = document.createElement("h3");
+heading3.setAttribute("id", "h");
+heading3.innerHTML =
+  "Please click on the identical tiles to verify that you are not a robot.";
+document.body.prepend(heading3);
+
+// creared btn
+let arr = ["reset", "verify"];
+for (let t of arr) {
+  let btn = document.createElement("button");
+  btn.setAttribute("id", t);
+  btn.innerHTML = t.toUpperCase();
+  // btn.style.backgroundColor = "blue"
+  // btn.style.color = "white"
+  // btn.style.cssText = "color: white; background-color: blue;"
+  btn.style.display = "none";
+  document.body.append(btn);
 }
 
-let captcha = [];
-function clearCaptcha() {
-  for (let i = 0; i < 6; i++) {
-    image[i].onclick = (e) => captchaClick(e);
+// generating 6thclass name randomly from 5 values
+let imgClass = ["img1", "img2", "img3", "img4", "img5"];
+let randomIndex1 = Math.floor(Math.random() * imgClass.length);
+let randomImg = imgClass[randomIndex1];
+imgClass.push(randomImg); // ["img1", "img2", "img3", "img4", "img5", "img3"]
+
+// shuffling the array - so that img will generate randomly at each position after reload
+let arr1 = [];
+// let randomIndex2 = Math.floor(Math.random() * imgClass.length) // 3  , 1,2,3,5
+let k = 0;
+while (k < imgClass.length) {
+  // if(k == imgClass.length ){
+  //     break
+  // }
+  let randomIndex2 = Math.floor(Math.random() * imgClass.length); // 3
+  if (arr1[randomIndex2] == undefined) {
+    arr1[randomIndex2] = imgClass[k];
+    k = k + 1;
+  } else if (arr1[randomIndex2] != undefined) {
+    continue;
   }
-  captcha = [];
-  try {
-    document.getElementById("para").remove();
-  } catch (e) {}
-  try {
-    document.getElementById("btn").remove();
-  } catch (e) {}
-  try {
-    document.getElementById("reset").remove();
-  } catch (e) {}
 }
 
-function captchaClick(e) {
-  console.log(e.target.attributes["data-ns-test"].nodeValue);
-  captcha.push(e.target.attributes["data-ns-test"].nodeValue);
-  e.target.onclick = () => {};
-  // console.log(captcha);
+// selecting all images
+let images = document.querySelectorAll("img"); // 0 - 6
 
-  if (captcha.length === 1) {
-    let p = document.createElement("button");
-    p.id = "reset";
-    p.innerHTML = "Reset";
-    p.onclick = () => {
-      clearCaptcha();
-    };
-    document.getElementById("main").appendChild(p);
-  }
-
-  if (captcha.length === 2) {
-    let t = document.createElement("button");
-    t.id = "btn";
-    t.innerHTML = "Verify";
-    t.onclick = () => {
-      captchaVerify();
-    };
-    document.getElementById("main").appendChild(t);
-  } else if (captcha.length > 2) {
-    try {
-      document.getElementById("btn").remove();
-    } catch (e) {}
-  }
-  try {
-    document.getElementById("para").remove();
-  } catch (e) {}
+// setting attibute - class Name to all images
+for (let i = 0; i <= arr1.length - 1; i++) {
+  images[i].setAttribute("class", arr1[i]);
+  images[i].setAttribute("id", i);
 }
 
-function captchaVerify() {
-  if (captcha.length === 2 && captcha[0] === captcha[1]) {
-    let t = document.createElement("p");
-    t.innerHTML = "You are a human. Congratulations!";
-    t.id = "para";
-    document.getElementById("main").appendChild(t);
+for (let t of images) {
+  t.addEventListener("click", userOrRobot);
+}
+
+let resetBtn = document.getElementById("reset");
+let verifyBtn = document.getElementById("verify");
+
+let prevImgId = "";
+let count = 0;
+function userOrRobot(e) {
+  resetBtn.style.display = "inline";
+  let currentImgId = e.target.id;
+  // change border of image after click
+
+  if (currentImgId != prevImgId) {
+    images[currentImgId].classList.add("selected");
+    count++;
+    prevImgId = currentImgId;
+    if (count == 2) {
+      verifyBtn.style.display = "inline";
+    }
+  }
+}
+
+resetBtn.addEventListener("click", () => {
+  verifyBtn.style.display = "none";
+  resetBtn.style.display = "none";
+  count = 0;
+  selctedImages = document.querySelectorAll(".selected");
+
+  for (let t of selctedImages) {
+    t.classList.remove("selected");
+  }
+});
+
+verifyBtn.addEventListener("click", () => {
+  let p = document.createElement("p");
+  selctedImages = document.querySelectorAll(".selected");
+  let class1 = selctedImages[0].className;
+  let class2 = selctedImages[1].className;
+
+  if (class1 == class2) {
+    p.innerHTML = "You are a human. Congratulations! ";
   } else {
-    let t = document.createElement("p");
-    t.innerHTML =
-      "We can't verify you as a human. You selected the non-identical tiles.";
-    t.id = "para";
-    document.getElementById("main").appendChild(t);
+    p.innerHTML =
+      "We can't verify you as a human. You selected the non-identical tiles ";
   }
-  document.getElementById("btn").remove();
-}
+  verifyBtn.style.display = "none";
+  document.body.append(p);
+});
